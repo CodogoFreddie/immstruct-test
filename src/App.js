@@ -1,20 +1,54 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Fragment } from "react";
+import component from "omniscient";
 
-class App extends Component {
+import {
+  structureTodos,
+  loadTodo,
+  toggleTodoDone,
+  setTodoText
+} from "./structureTodos";
+
+loadTodo(1);
+loadTodo(2);
+loadTodo(3);
+
+const Todo = component(({ todo }) => (
+  <div
+    style={{
+      margin: "1em",
+      backgroundColor: todo.get("done") ? "coral" : "lightgrey"
+    }}
+  >
+    {todo.get("loading") ? (
+      "loading..."
+    ) : (
+      <Fragment>
+        <div onClick={() => toggleTodoDone(todo)}>
+          {todo.get("done") ? "done" : "not done"}
+        </div>
+        <input
+          onChange={e => setTodoText(todo)(e.target.value)}
+          value={todo.get("text")}
+        />
+      </Fragment>
+    )}
+  </div>
+));
+
+const Todos = component(({ cursor }) => (
+  <div style={{ backgroundColor: "red", padding: "1em" }}>
+    {cursor.map(todo => <Todo key={todo.get("id")} todo={todo} />)}
+  </div>
+));
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    structureTodos.on("swap", () => this.forceUpdate());
+  }
+
   render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
+    return <Todos cursor={structureTodos.cursor()} />;
   }
 }
 
